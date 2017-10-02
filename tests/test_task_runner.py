@@ -1,5 +1,5 @@
 import unittest
-import task_runner
+from dags import task_runner
 import mocked_classes as md
 import empty_mocked_classes as empty_module
 

@@ -1,4 +1,4 @@
-from task_runner import BaseTask
+from dags.task_runner import BaseTask
 
 
 class A(BaseTask):
