@@ -1,12 +1,14 @@
 import inspect
 from abc import ABCMeta, abstractmethod
 
-
 DEPENDENCIES = 'dependencies'
 
 
-class BaseTask(object):
+class CircularException(Exception):
+    pass
 
+
+class BaseTask(object):
     __metaclass__ = ABCMeta
 
     dependencies = []
@@ -75,6 +77,26 @@ class TaskRunner(object):
         except AttributeError:
             return False
 
+    @staticmethod
+    def check_circular_dependencies(task, depends_on_list):
+        """
+        Method which checks for any circular dependencies which would raise a "maximum recursion depth exceeded" Error.
+        :param task: task to be checked
+        :param depends_on_list: dependent tasks
+        :return: None
+        """
+        for cls in depends_on_list:
+            dependencies = getattr(cls, DEPENDENCIES)
+            for dependency in dependencies:
+                if task == dependency:
+                    message = "Circular dependency noticed. {source_task} depends on {dependent_task} " \
+                              "but {dependent_task} contains {source_task} in its dependencies. " \
+                              "Here are dependent tasks for {dependent_task}: [{dependencies}]".format(
+                                source_task=task.__name__,
+                                dependent_task=cls.__name__,
+                                dependencies=", ".join(d.__name__ for d in dependencies))
+                    raise CircularException(message)
+
     def get_task_order(self, task):
         """
         Calculate the run order given a task and, where applicable, its dependencies
@@ -90,6 +112,11 @@ class TaskRunner(object):
             for dependency in depends_on_list:
                 # we keep calling the class_order method via recursion until all classes and their dependencies
                 # have been inspected
+                try:
+                    # check for any circular dependencies. Raise exception if found
+                    self.check_circular_dependencies(task=task, depends_on_list=depends_on_list)
+                except CircularException as e:
+                    raise e
                 ordered_class = self.get_task_order(task=dependency)
                 task_list.extend(ordered_class)
             task_list.append(task)
