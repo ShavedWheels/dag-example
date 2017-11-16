@@ -47,7 +47,7 @@ class TestDependencyRunner(unittest.TestCase):
         self.assertEqual(self.runner.get_distinct_task_order(ordered_tasks=task_list), expected)
 
     def test_run_tasks(self):
-        self.assertEqual(self.runner.run_tasks(), 6)
+        self.assertEqual(self.runner.run_tasks(), 7)
 
 
 if __name__ == '__main__':
