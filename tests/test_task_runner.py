@@ -36,6 +36,11 @@ class TestDependencyRunner(unittest.TestCase):
         expected = [md.A, md.A, md.B, md.D, md.C]
         self.assertEqual(class_order, expected)
 
+    def test_get_task_order_circular_dependency(self):
+        md.F.dependencies = [md.G]
+        self.assertRaises(task_runner.CircularException, self.runner.get_task_order, task=md.G)
+        md.F.dependencies = []
+
     def test_get_distinct_task_order(self):
         expected = [md.A, md.B, md.D, md.C, md.F]
         task_list = [md.A, md.A, md.B, md.B,  md.D, md.D, md.D, md.C, md.C, md.F]
@@ -43,6 +48,7 @@ class TestDependencyRunner(unittest.TestCase):
 
     def test_run_tasks(self):
         self.assertEqual(self.runner.run_tasks(), 6)
+
 
 if __name__ == '__main__':
     unittest.main()

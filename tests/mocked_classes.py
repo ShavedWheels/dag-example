@@ -38,3 +38,11 @@ class F(BaseTask):
 
     def run_task(self):
         pass
+
+
+class G(BaseTask):
+
+    dependencies = [F]
+
+    def run_task(self):
+        pass
